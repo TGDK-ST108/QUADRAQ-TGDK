@@ -13,15 +13,35 @@
 #include "OliviaAI.hpp"
 #endif
 
-// === Global Backend Pointers ===
-static std::unique_ptr<IAIBackend> g_ownedBackend = nullptr;
+// ====================================================================
+//                       Backend State
+// ====================================================================
+
 IAIBackend* gAIBackendPtr = nullptr;
-static bool usingOlivia = false;
+std::unique_ptr<IAIBackend> g_ownedBackend = nullptr;
 
-// === DLL Loader State ===
-static HMODULE g_aiDllHandle = nullptr;
+// ====================================================================
+//                     Backend Set / Get Functions
+// ====================================================================
 
-// === Olivia Adapter Implementation ===
+IAIBackend* GetAIBackend() {
+    return gAIBackendPtr;
+}
+
+void SetAIBackend(std::unique_ptr<IAIBackend> backend) {
+    g_ownedBackend = std::move(backend);
+    gAIBackendPtr = g_ownedBackend.get();
+}
+
+void ClearAIBackend() {
+    g_ownedBackend.reset();
+    gAIBackendPtr = nullptr;
+}
+
+// ====================================================================
+//                       Olivia Bridge (Optional)
+// ====================================================================
+
 #ifdef TGDK_USE_OLIVIA
 class OliviaBridgeAI : public IAIBackend {
 public:
@@ -54,12 +74,23 @@ public:
         return "OliviaAI";
     }
 
-    std::string Identify() const override { return "OliviaAI"; }
-    std::string GetStatusString() const override { return "Live"; }
+    std::string Identify() const override {
+        return "OliviaAI";
+    }
+
+    std::string GetStatusString() const override {
+        return "Live";
+    }
 };
 #endif
 
-// === DLL Load Entry Point ===
+// ====================================================================
+//                     DLL Loader for External AIs
+// ====================================================================
+
+static bool usingOlivia = false;
+static HMODULE g_aiDllHandle = nullptr;
+
 typedef IAIBackend* (*CreateAIBackendFunc)();
 
 bool LoadAIBackendDLL(const std::string& dllPath) {
@@ -81,31 +112,14 @@ bool LoadAIBackendDLL(const std::string& dllPath) {
     return gAIBackendPtr != nullptr;
 }
 
-// === Core Access ===
-IAIBackend* GetAIBackend() {
-    return gAIBackendPtr;
-}
-
-void SetAIBackend(std::unique_ptr<IAIBackend> backend) {
-    g_ownedBackend = std::move(backend);
-    gAIBackendPtr = g_ownedBackend.get();
-}
-
-void ClearAIBackend() {
-    g_ownedBackend.reset();
-    gAIBackendPtr = nullptr;
-
-    if (g_aiDllHandle) {
-        FreeLibrary(g_aiDllHandle);
-        g_aiDllHandle = nullptr;
-    }
-}
+// ====================================================================
+//                     Core Routing / Identity
+// ====================================================================
 
 bool IsOliviaActive() {
     return usingOlivia;
 }
 
-// === Optional Factory Call ===
 std::unique_ptr<IAIBackend> CreateOliviaBridgeIfEnabled() {
 #ifdef TGDK_USE_OLIVIA
     usingOlivia = true;

@@ -20,7 +20,6 @@
 #include <memory>
 #include <d3d11.h>
 
-
 // ==== BACKEND DECLARATIONS ==== //
 #ifdef TGDK_USE_OLIVIA
 #include "AI_Backends/OliviaAI.hpp"
@@ -38,6 +37,8 @@
 #include "StubAI.hpp"
 #endif
 
+// 🔧 FIXED: Extern declaration must match TGDK_IAIBackend.cpp (global scope)
+extern IAIBackend* gAIBackendPtr;
 
 std::unique_ptr<IAIBackend> TryInstantiateBackend() {
 #ifdef TGDK_USE_OLIVIA
@@ -91,7 +92,6 @@ std::unique_ptr<IAIBackend> TryInstantiateBackend() {
 // ==== CLI LOGIC ==== //
 namespace QUADRAQ {
     ID3D11Device* g_device = nullptr;
-
 
     void QUADRAQ_CLI_AISwitchLoop();
 

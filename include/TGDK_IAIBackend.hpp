@@ -1,46 +1,42 @@
-#ifndef TGDK_IAIBACKEND_HPP
-#define TGDK_IAIBACKEND_HPP
+#pragma once
 
-#include <string>
 #include <memory>
-#include <iostream>
+#include <string>
 
-// ====================================================================
-//                       Abstract AI Backend
-// ====================================================================
 class IAIBackend {
 public:
-    std::unique_ptr<IAIBackend> CreateOliviaBridgeIfEnabled();
+    virtual ~IAIBackend() = default;
+
     virtual bool Initialize() = 0;
-    virtual void OnFrame() = 0;
+    virtual void Shutdown() {}
+
     virtual void Log(const std::string& msg) = 0;
     virtual void LogError(const std::string& msg) = 0;
-    virtual bool IsOliviaActive() const = 0;
-    virtual bool ShouldSuppressDraw(float entropy) = 0;
+
+    virtual void OnFrameStart() {}
+    virtual void OnFrame() = 0;
+    virtual void OnFrameEnd() {}
+
+    virtual void OnInterceptEvent(const std::string& event) {} // <-- Add this line
+
+    virtual bool IsOliviaActive() const { return false; }
+    virtual bool ShouldSuppressDraw(float delta) { return false; }
+
+    virtual std::string GetBackendName() const = 0;
     virtual std::string Identify() const = 0;
     virtual std::string GetStatusString() const = 0;
-    virtual std::string GetBackendName() const { return "IAIBackend"; }
-    virtual void OnFrameStart() {}
-    virtual void OnFrameEnd() {}
-    virtual void OnInterceptEvent(const std::string&) {}
-    virtual void Shutdown() {}
-    virtual std::string Query(const std::string& input) {
-        return "[IAIBackend] Default query handler.";
-    }
-
-    virtual ~IAIBackend() = default;
+    virtual std::string Query(const std::string& input) = 0;
 };
 
-// ====================================================================
-//                       Global Backend Access
-// ====================================================================
+// Declare global pointer
+extern IAIBackend* gAIBackendPtr;
 
-// Owned backend instance
+// Backend routing functions
 IAIBackend* GetAIBackend();
 void SetAIBackend(std::unique_ptr<IAIBackend> backend);
 void ClearAIBackend();
 
-// Raw pointer compatibility (for legacy modules)
-extern IAIBackend* gAIBackendPtr;
-
-#endif // TGDK_IAIBACKEND_HPP
+// Olivia bridge support
+std::unique_ptr<IAIBackend> CreateOliviaBridgeIfEnabled();
+bool IsOliviaActive();
+std::string GetOliviaStatusString();

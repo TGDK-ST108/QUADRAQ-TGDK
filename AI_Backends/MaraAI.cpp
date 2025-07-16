@@ -71,6 +71,10 @@ public:
         Log("Shutdown signal accepted. Purging surface variables.");
     }
 
+    std::string GetBackendName() const override {
+        return "MaraAI";
+    }
+
 private:
     std::string GetTimestamp() {
         auto now = std::chrono::system_clock::now();

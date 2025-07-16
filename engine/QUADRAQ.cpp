@@ -30,6 +30,8 @@
 #include <mutex>
 #include <cstdlib>
 
+IAIBackend* gAIBackendPtr = nullptr;
+
 namespace QUADRAQ {
 
     // === Global State ===
@@ -57,11 +59,14 @@ namespace QUADRAQ {
             return false;
         }
 
-        gAIBackendPtr = createFunc();
-        return gAIBackendPtr != nullptr;
+        // You may want to assign gAIBackendPtr here if needed
+        // gAIBackendPtr = createFunc();
+
+        return true;
     }
 
-    static bool LoadCustomAI() {
+    bool LoadCustomAI();
+    bool LoadCustomAI() {
         std::string aiDll = "OliviaAI.dll";
         if (const char* envOverride = std::getenv("QUADRAQ_AI_DLL")) {
             aiDll = envOverride;
@@ -99,12 +104,13 @@ namespace QUADRAQ {
         return false;
     }
 
-    static void StartCLIRuntime() {
+    void StartCLIRuntime() {
         cliThread = std::thread(QUADRAQ_CLI_Main);
         cliThread.detach();
     }
 
-    static void InitFlatTextureIntercepts() {
+    // This must be at namespace scope, not inside any function!
+    void InitFlatTextureIntercepts() {
         FlatDDSInterceptor::LoadFlatTexture(g_device, L"texture_flat_grayscale_minimal.dds");
 
         FlatDDSInterceptor::RegisterOverride("clouds_volumetric_layer.dds");
@@ -118,6 +124,7 @@ namespace QUADRAQ {
             gAIBackendPtr->Log("QUADRAQ :: FlatDDS overrides initialized.");
     }
 
+    // This must be at namespace scope, not inside any function!
     static DWORD WINAPI MainThreadProc(LPVOID) {
         if (!LoadCustomAI()) return 1;
 
@@ -133,7 +140,7 @@ namespace QUADRAQ {
             return 2;
         }
 
-        InitFlatTextureIntercepts();
+        QUADRAQ::InitFlatTextureIntercepts();
         QuantumDrawRouter::EnableRouting(true);
 
         if (gAIBackendPtr) gAIBackendPtr->Log("QUADRAQ :: Acceleration Layer Ready");

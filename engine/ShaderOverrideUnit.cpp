@@ -6,6 +6,7 @@
 
 #include "ShaderOverrideUnit.hpp"
 #include "TGDK_IAIBackend.hpp"
+#include "QUADRAQ.hpp"
 
 #include <d3d11.h>
 #include <dxgi.h>

@@ -42,6 +42,7 @@ endif()
 include_directories(
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/AI_Backends
+    ${CMAKE_SOURCE_DIR}/engine
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_BINARY_DIR}
 )
@@ -93,6 +94,7 @@ install(DIRECTORY external/DirectXTK/Source/
 install(FILES AI_Backends/KerfumplInterceptor.cpp
     DESTINATION include/QUADRAQ/AI_Backends
 )
+
 
 # === Build CLI Executable ===
 add_executable(quadraq_cli engine/QUADRAQ_CLI.cpp "AI_Backends/KerfumplInterceptor.cpp")

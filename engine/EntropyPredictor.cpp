@@ -36,10 +36,11 @@ namespace EntropyPredictor {
         entropyRate = 0.0f;
         initialized = true;
 
-        if (gAIBackendPtr)
-            gAIBackendPtr->Log("EntropyPredictor :: Initialized with sliding window size: " + std::to_string(sampleWindow));
+        if (GetAIBackend()) {
+            GetAIBackend()->Log("Running");
+        }
 
-        return true;
+        return true; // Added return statement to fix C4716
     }
 
     void SetEnabled(bool enable) {

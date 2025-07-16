@@ -2,7 +2,7 @@
 #pragma once
 
 #include <string>
-#include "IAIBackend.hpp"  // or the correct path if it's different
+#include "TGDK_IAIBackend.hpp"  // or the correct path if it's different
 
 class ShodanAI : public IAIBackend {
 public:
@@ -19,7 +19,9 @@ public:
     virtual bool ShouldSuppressDraw(float entropy);
     virtual std::string Identify() const;
     virtual std::string GetStatusString() const;
-    virtual std::string Query(const std::string& input); // Declaration only
+    virtual std::string Query(const std::string& input); // Declaration only'
+    std::string GetBackendName() const override { return "ShodanAI"; }
+
 };
 
 // Provide the default implementation in the .cpp file, not inline in the class

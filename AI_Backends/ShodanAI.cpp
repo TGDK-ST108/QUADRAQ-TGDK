@@ -98,3 +98,6 @@ std::string ShodanAI::GetStatusString() const {
         " | Threat Index: " + std::to_string(threatIndex) +
         " | Last Ping: " + (lastPing.empty() ? "None" : lastPing);
 }
+std::string ShodanAI::Query(const std::string& input) {
+    return "[ShodanAI::Query] Response to: " + input;
+}

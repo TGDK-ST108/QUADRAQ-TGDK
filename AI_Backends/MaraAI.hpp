@@ -23,7 +23,8 @@ public:
     bool ShouldSuppressDraw(float entropy) override;
     std::string Identify() const override;
     std::string GetStatusString() const override;
-};
+    std::string GetBackendName() const override;
+}; // <-- Added missing semicolon
 
 // Exported creator for dynamic linkage
 extern "C" __declspec(dllexport) IAIBackend* CreateAIBackend();
