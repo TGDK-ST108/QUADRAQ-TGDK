@@ -11,22 +11,86 @@
 #include "FlatDDSInterceptor.hpp"
 #include "TGDK_IAIBackend.hpp"
 #include "AIRegistry.hpp"
-#include "AI_Backends/OliviaAI.hpp" 
 
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <thread>
+#include <memory>
 
- // or MaraAI.hpp
+// ==== BACKEND DECLARATIONS ==== //
+#ifdef TGDK_USE_OLIVIA
+#include "AI_Backends/OliviaAI.hpp"
+#endif
+
+#ifdef TGDK_USE_MARA
+#include "AI_Backends/MaraAI.hpp"
+#endif
+
+#ifdef TGDK_USE_SHODAN
+#include "AI_Backends/ShodanAI.hpp"
+#endif
+
+#ifdef TGDK_USE_STUB
+#include "StubAI.hpp"
+#endif
 
 IAIBackend* gAIBackendPtr = nullptr;
 
+std::unique_ptr<IAIBackend> TryInstantiateBackend() {
+#ifdef TGDK_USE_OLIVIA
+    try {
+        auto ptr = std::make_unique<OliviaAI>();
+        if (ptr->Initialize()) {
+            std::cout << "[QUADRAQ] OliviaAI active.\n";
+            return ptr;
+        }
+    }
+    catch (...) {
+        std::cerr << "[QUADRAQ] OliviaAI instantiation failed.\n";
+    }
+#endif
+
+#ifdef TGDK_USE_MARA
+    try {
+        auto ptr = std::make_unique<MaraAI>();
+        if (ptr->Initialize()) {
+            std::cout << "[QUADRAQ] MaraAI active.\n";
+            return ptr;
+        }
+    }
+    catch (...) {
+        std::cerr << "[QUADRAQ] MaraAI instantiation failed.\n";
+    }
+#endif
+
+#ifdef TGDK_USE_SHODAN
+    try {
+        auto ptr = std::make_unique<ShodanAI>();
+        if (ptr->Initialize()) {
+            std::cout << "[QUADRAQ] ShodanAI active.\n";
+            return ptr;
+        }
+    }
+    catch (...) {
+        std::cerr << "[QUADRAQ] ShodanAI instantiation failed.\n";
+    }
+#endif
+
+#ifdef TGDK_USE_STUB
+    std::cout << "[QUADRAQ] Falling back to StubAI.\n";
+    return std::make_unique<StubAI>();
+#else
+    std::cerr << "[QUADRAQ] No valid backend available.\n";
+    return nullptr;
+#endif
+}
+
+// ==== CLI LOGIC ==== //
 namespace QUADRAQ {
 
     void QUADRAQ_CLI_AISwitchLoop();
 
-    // Main CLI control loop for QUADRAQ
     void QUADRAQ_CLI_Main() {
         bool entropyOn = true;
         bool shaderOn = true;
@@ -74,8 +138,8 @@ namespace QUADRAQ {
                 std::cout << "[CLI] Flat texture overrides reloaded.\n";
             }
             else if (input == "5") {
-                if (gAIBackend) {
-                    std::cout << "[CLI] Current AI reports: " << gAIBackend->GetStatusString() << "\n";
+                if (gAIBackendPtr) {
+                    std::cout << "[CLI] Current AI reports: " << gAIBackendPtr->GetStatusString() << "\n";
                 }
                 else {
                     std::cout << "[CLI] No AI backend active.\n";
@@ -131,7 +195,7 @@ namespace QUADRAQ {
                 std::string label = command.substr(7);
                 auto* ai = AIRegistry::Get(label);
                 if (ai) {
-                    gAIBackend = ai;
+                    gAIBackendPtr = ai;
                     ai->Log("Activated via CLI.");
                     std::cout << "[CLI] AI '" << label << "' is now active.\n";
                 }
@@ -149,28 +213,29 @@ namespace QUADRAQ {
         }
     }
 
-}  // namespace QUADRAQ
+} // namespace QUADRAQ
 
-
+// ==== MAIN ENTRY POINT ==== //
 int main() {
-    // SAFELY allocate the backend
-    gAIBackendPtr = new OliviaAI(); // or new MaraAI();
+    auto ai = TryInstantiateBackend();
 
-    if (!gAIBackendPtr->Initialize()) {
-        gAIBackendPtr->LogError("AI backend failed to initialize.");
+    if (!ai) {
+        std::cerr << "Fatal: Could not initialize any backend.\n";
         return 1;
     }
 
-    // Example loop
-    for (int i = 0; i < 10; ++i) {
+    gAIBackendPtr = ai.get();
+
+    for (int i = 0; i < 5; ++i) {
         gAIBackendPtr->OnFrameStart();
         gAIBackendPtr->OnFrame();
         gAIBackendPtr->OnFrameEnd();
     }
 
     gAIBackendPtr->Shutdown();
-    delete gAIBackendPtr;
-    gAIBackendPtr = nullptr;
+
+    // Launch CLI after init loop
+    QUADRAQ::QUADRAQ_CLI_Main();
 
     return 0;
 }

@@ -50,9 +50,9 @@ include_directories(
 add_subdirectory(external/DirectXTK)
 
 # === Build QUADRAQ Shared Library ===
-add_library(QUADRAQ SHARED ${SOURCES} ${HEADERS})
+add_library(QUADRAQ SHARED ${SOURCES} ${HEADERS} "AI_Backends/KerfumplInterceptor.cpp")
 target_link_libraries(QUADRAQ PRIVATE DirectXTK d3d11)
 
 # === Build CLI Executable ===
-add_executable(quadraq_cli engine/QUADRAQ_CLI.cpp)
+add_executable(quadraq_cli engine/QUADRAQ_CLI.cpp "AI_Backends/KerfumplInterceptor.cpp")
 target_link_libraries(quadraq_cli PRIVATE QUADRAQ DirectXTK d3d11)
