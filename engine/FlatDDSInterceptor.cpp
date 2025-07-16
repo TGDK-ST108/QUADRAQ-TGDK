@@ -6,6 +6,7 @@
 
 #include "FlatDDSInterceptor.hpp"
 #include "TGDK_IAIBackend.hpp"
+#include "QUADRAQ.hpp"
 
 #include <d3d11.h>
 #include <wrl.h>
@@ -18,6 +19,7 @@ using namespace Microsoft::WRL;
 
 namespace FlatDDSInterceptor {
 
+    static IAIBackend* gAIBackendPtr = nullptr;
     static ID3D11ShaderResourceView* flatTextureSRV = nullptr;
     static std::unordered_map<std::string, ID3D11ShaderResourceView*> redirectMap;
     static std::mutex interceptMutex;

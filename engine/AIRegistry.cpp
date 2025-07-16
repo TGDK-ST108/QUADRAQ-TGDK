@@ -1,10 +1,9 @@
 #include "AIRegistry.hpp"
 #include <iostream>
+#include "QUADRAQ.hpp"
 
 namespace QUADRAQ {
 
-    // Define global AI pointer once
-    IAIBackend* gAIBackendPtr = nullptr;
 
     // Internal registry map (hidden inside Registry())
     std::unordered_map<std::string, std::unique_ptr<IAIBackend>>& AIRegistry::Registry() {

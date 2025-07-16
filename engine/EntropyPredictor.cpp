@@ -17,6 +17,7 @@
 
 namespace EntropyPredictor {
 
+    static IAIBackend* gAIBackendPtr = nullptr;
     static std::deque<float> frameTimes;
     static const size_t sampleWindow = 120; // Sliding window of last N frames
     static std::chrono::high_resolution_clock::time_point lastTime;

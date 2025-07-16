@@ -8,11 +8,13 @@
 #include "QuantumDrawRouter.hpp"
 #include "TGDK_IAIBackend.hpp"
 #include "EntropyPredictor.hpp"
+#include "QUADRAQ.hpp"
 
 #include <d3d11.h>
 #include <mutex>
 
 namespace QuantumDrawRouter {
+    static IAIBackend* gAIBackendPtr = nullptr;
 
     static bool routingEnabled = true;
     static float entropyThreshold = 0.010f; // Default drop level

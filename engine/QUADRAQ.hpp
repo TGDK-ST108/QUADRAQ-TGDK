@@ -12,6 +12,6 @@ namespace QUADRAQ {
 
     // Initializes QUADRAQ systems including AI, Shader Hooks, and Interceptors.
     DWORD WINAPI MainThreadProc(LPVOID);
-    extern class IAIBackend* gAIBackendPtr;
+    extern IAIBackend* gAIBackendPtr;
 
 } // namespace QUADRAQ

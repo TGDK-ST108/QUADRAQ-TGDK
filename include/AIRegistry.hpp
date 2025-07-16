@@ -4,11 +4,9 @@
 #include <string>
 #include <unordered_map>
 #include "TGDK_IAIBackend.hpp"
+#include "QUADRAQ.hpp"
 
 namespace QUADRAQ {
-
-    // === Global Backend Pointer Declaration ===
-    extern IAIBackend* gAIBackendPtr;
 
     class AIRegistry {
     public:

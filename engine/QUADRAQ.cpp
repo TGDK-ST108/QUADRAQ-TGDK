@@ -30,9 +30,9 @@
 #include <mutex>
 #include <cstdlib>
 
-IAIBackend* gAIBackendPtr = nullptr;
-
 namespace QUADRAQ {
+
+    IAIBackend* gAIBackendPtr = nullptr;
 
     // === Global State ===
     static ID3D11Device* g_device = nullptr;

@@ -25,6 +25,7 @@ namespace {
 
 namespace ShaderOverrideUnit {
 
+    static IAIBackend* gAIBackendPtr = nullptr;
     static ID3D11Device* g_device = nullptr;
     static ID3D11DeviceContext* g_context = nullptr;
     static std::mutex shader_mutex;

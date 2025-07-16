@@ -12,6 +12,7 @@
 #include "TGDK_IAIBackend.hpp"
 #include "AIRegistry.hpp"
 #include "KerflumpInterceptor.hpp"
+#include "QUADRAQ_CLI.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -37,8 +38,9 @@
 #include "StubAI.hpp"
 #endif
 
-// 🔧 FIXED: Extern declaration must match TGDK_IAIBackend.cpp (global scope)
-extern IAIBackend* gAIBackendPtr;
+namespace QUADRAQ {
+    extern IAIBackend* gAIBackendPtr;
+}
 
 std::unique_ptr<IAIBackend> TryInstantiateBackend() {
 #ifdef TGDK_USE_OLIVIA
@@ -91,6 +93,7 @@ std::unique_ptr<IAIBackend> TryInstantiateBackend() {
 
 // ==== CLI LOGIC ==== //
 namespace QUADRAQ {
+    IAIBackend* gAIBackendPtr = nullptr;
     ID3D11Device* g_device = nullptr;
 
     void QUADRAQ_CLI_AISwitchLoop();
@@ -229,7 +232,7 @@ int main() {
         return 1;
     }
 
-    gAIBackendPtr = ai.get();
+    QUADRAQ::gAIBackendPtr = ai.get();
 
     // Optional: Initialize Kerflump Interceptor
     KerflumpInterceptor::Initialize(nullptr, nullptr);  // Replace with actual D3D device/context if needed
@@ -238,13 +241,13 @@ int main() {
 
     for (int i = 0; i < 5; ++i) {
         KerflumpInterceptor::PreFrameFold();
-        gAIBackendPtr->OnFrameStart();
-        gAIBackendPtr->OnFrame();
-        gAIBackendPtr->OnFrameEnd();
+        QUADRAQ::gAIBackendPtr->OnFrameStart();
+        QUADRAQ::gAIBackendPtr->OnFrame();
+        QUADRAQ::gAIBackendPtr->OnFrameEnd();
         KerflumpInterceptor::PostFrameJumpFlush();
     }
 
-    gAIBackendPtr->Shutdown();
+    QUADRAQ::gAIBackendPtr->Shutdown();
 
     std::cout << "\n==== QUADRAQ CLI ====\n";
     QUADRAQ::QUADRAQ_CLI_Main();

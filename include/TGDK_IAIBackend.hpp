@@ -28,9 +28,6 @@ public:
     virtual std::string Query(const std::string& input) = 0;
 };
 
-// Declare global pointer
-extern IAIBackend* gAIBackendPtr;
-
 // Backend routing functions
 IAIBackend* GetAIBackend();
 void SetAIBackend(std::unique_ptr<IAIBackend> backend);

@@ -8,6 +8,7 @@
 #include <iostream>
 #include <memory>
 #include <windows.h>
+#include "QUADRAQ.hpp"
 
 #ifdef TGDK_USE_OLIVIA
 #include "OliviaAI.hpp"
@@ -17,8 +18,8 @@
 //                       Backend State
 // ====================================================================
 
-IAIBackend* gAIBackendPtr = nullptr;
 std::unique_ptr<IAIBackend> g_ownedBackend = nullptr;
+static IAIBackend* gAIBackendPtr = nullptr;
 
 // ====================================================================
 //                     Backend Set / Get Functions
