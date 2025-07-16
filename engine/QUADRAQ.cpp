@@ -12,7 +12,7 @@
 #include "FlatDDSInterceptor.hpp"
 #include "TGDK_IAIBackend.hpp"
 #include "AIRegistry.hpp"
-#incliude "OliviaAI.hpp"
+#include "OliviaAI.hpp"
 #include "MaraAI.hpp"
 #include "ShodanAI.hpp"
 #include "ConsoleAI.hpp"
