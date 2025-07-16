@@ -55,40 +55,7 @@ public:
 };
 #endif
 
-// === Default Console AI Backend ===
-class DefaultConsoleAI : public IAIBackend {
-public:
-    bool Initialize() override {
-        Log("DefaultConsoleAI initialized.");
-        return true;
-    }
-
-    void Log(const std::string& msg) override {
-        OutputDebugStringA(("[DefaultConsoleAI] " + msg + "\n").c_str());
-    }
-
-    void LogError(const std::string& err) override {
-        OutputDebugStringA(("[DefaultConsoleAI:ERROR] " + err + "\n").c_str());
-    }
-
-    void OnFrame() override {
-        // No-op
-    }
-
-    bool IsOliviaActive() const override {
-        return false;
-    }
-
-    bool ShouldSuppressDraw(float) override {
-        return false;
-    }
-
-    std::string GetBackendName() const override {
-        return "DefaultConsoleAI";
-    }
-};
-
-// === Factory Function ===
+/*// === Factory Function ===
 std::unique_ptr<IAIBackend> CreateAIBackend(bool useOlivia) {
 #ifdef TGDK_USE_OLIVIA
     if (useOlivia) {
@@ -98,14 +65,13 @@ std::unique_ptr<IAIBackend> CreateAIBackend(bool useOlivia) {
 #endif
     usingOlivia = false;
     return std::make_unique<DefaultConsoleAI>();
-}
+}*/
 
 // === Public Control Functions ===
-void SwitchAIBackend(bool useOliviaFlag) {
-    gAIBackend = CreateAIBackend(useOliviaFlag);
+/*    gAIBackend = CreateAIBackend(useOliviaFlag);
     gAIBackendPtr = gAIBackend.get();
     gAIBackend->Log(useOliviaFlag ? "Switched to OliviaAI." : "Switched to DefaultConsoleAI.");
-}
+}*/
 
 bool IsOliviaActive() {
     return usingOlivia;

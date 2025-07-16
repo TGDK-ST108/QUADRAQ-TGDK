@@ -11,13 +11,16 @@
 #include "FlatDDSInterceptor.hpp"
 #include "TGDK_IAIBackend.hpp"
 #include "AIRegistry.hpp"
+#include "AI_Backends/OliviaAI.hpp" 
 
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <thread>
 
-extern IAIBackend* gAIBackend;
+ // or MaraAI.hpp
+
+IAIBackend* gAIBackendPtr = nullptr;
 
 namespace QUADRAQ {
 
@@ -147,3 +150,27 @@ namespace QUADRAQ {
     }
 
 }  // namespace QUADRAQ
+
+
+int main() {
+    // SAFELY allocate the backend
+    gAIBackendPtr = new OliviaAI(); // or new MaraAI();
+
+    if (!gAIBackendPtr->Initialize()) {
+        gAIBackendPtr->LogError("AI backend failed to initialize.");
+        return 1;
+    }
+
+    // Example loop
+    for (int i = 0; i < 10; ++i) {
+        gAIBackendPtr->OnFrameStart();
+        gAIBackendPtr->OnFrame();
+        gAIBackendPtr->OnFrameEnd();
+    }
+
+    gAIBackendPtr->Shutdown();
+    delete gAIBackendPtr;
+    gAIBackendPtr = nullptr;
+
+    return 0;
+}

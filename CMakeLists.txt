@@ -5,28 +5,29 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# Gather headers and sources
-file(GLOB_RECURSE HEADERS
-    "${CMAKE_SOURCE_DIR}/include/*.hpp"
-)
+# === Gather engine and include files ===
+file(GLOB_RECURSE HEADERS "${CMAKE_SOURCE_DIR}/include/*.hpp")
+file(GLOB_RECURSE SOURCES "${CMAKE_SOURCE_DIR}/engine/*.cpp")
 
-file(GLOB_RECURSE SOURCES
-    "${CMAKE_SOURCE_DIR}/engine/*.cpp"
-)
+# === AI Backend Logic (No Default.cpp, No MyCustomAI.cpp) ===
+set(BACKEND_FOUND FALSE)
 
-# Optional AI backend logic
-if(EXISTS "${CMAKE_SOURCE_DIR}/AI_Backends/MyCustomAI.cpp")
-    message(STATUS "Using MyCustomAI.cpp")
-    list(APPEND SOURCES ${CMAKE_SOURCE_DIR}/AI_Backends/MyCustomAI.cpp)
-    list(APPEND HEADERS ${CMAKE_SOURCE_DIR}/AI_Backends/MyCustomAI.hpp)
+if(EXISTS "${CMAKE_SOURCE_DIR}/AI_Backends/MaraAI.cpp")
+    message(STATUS "Using MaraAI.cpp")
+    list(APPEND SOURCES ${CMAKE_SOURCE_DIR}/AI_Backends/MaraAI.cpp)
+    list(APPEND HEADERS ${CMAKE_SOURCE_DIR}/AI_Backends/MaraAI.hpp)
+    set(BACKEND_FOUND TRUE)
 elseif(EXISTS "${CMAKE_SOURCE_DIR}/AI_Backends/OliviaAI.cpp")
     message(STATUS "Using OliviaAI.cpp")
     list(APPEND SOURCES ${CMAKE_SOURCE_DIR}/AI_Backends/OliviaAI.cpp)
     list(APPEND HEADERS ${CMAKE_SOURCE_DIR}/AI_Backends/OliviaAI.hpp)
-else()
-    message(WARNING "No AI backend found (OliviaAI.cpp or MyCustomAI.cpp). Creating StubAI")
+    set(BACKEND_FOUND TRUE)
+endif()
 
-    # Write temporary stub fallback
+if(NOT BACKEND_FOUND)
+    message(WARNING "No AI backend found (MaraAI.cpp or OliviaAI.cpp). Creating StubAI")
+
+    # Fallback stub written directly to build dir
     file(WRITE ${CMAKE_BINARY_DIR}/StubAI.cpp
 "#include \"StubAI.hpp\"\nvoid run_stub_ai() {}\n")
 
@@ -37,17 +38,21 @@ else()
     list(APPEND HEADERS ${CMAKE_BINARY_DIR}/StubAI.hpp)
 endif()
 
-# Include directories
-include_directories(${CMAKE_SOURCE_DIR}/include)
-include_directories(${CMAKE_BINARY_DIR})  # for stub fallback
+# === Include Paths ===
+include_directories(
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/AI_Backends
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_BINARY_DIR}
+)
 
-# === DirectXTK via external ===
+# === DirectXTK dependency ===
 add_subdirectory(external/DirectXTK)
 
-# Build shared library
+# === Build QUADRAQ Shared Library ===
 add_library(QUADRAQ SHARED ${SOURCES} ${HEADERS})
 target_link_libraries(QUADRAQ PRIVATE DirectXTK d3d11)
 
-# CLI Executable
+# === Build CLI Executable ===
 add_executable(quadraq_cli engine/QUADRAQ_CLI.cpp)
 target_link_libraries(quadraq_cli PRIVATE QUADRAQ DirectXTK d3d11)

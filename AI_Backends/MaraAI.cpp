@@ -20,7 +20,7 @@ public:
         MessageBeep(MB_ICONERROR);
     }
 
-    std::string Identify() override {
+    std::string Identify() const override {
         return "MARA_AI_BACKEND_V5.2";
     }
 

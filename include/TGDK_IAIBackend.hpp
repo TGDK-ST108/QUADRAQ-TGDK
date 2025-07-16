@@ -1,43 +1,48 @@
 /* ====================================================================
 //                    TGDK_IAIBackend.hpp
-//    Interface for AI Logging / Control (OliviaAI-compatible)
-//    License: TGDK BFE-TGDK-022ST • Sean Tichenor • All Rights Reserved
-// ====================================================================*/
+//    Interface for AI Logging / Control (OliviaAI-Compatible)
+// ==================================================================== */
 
 #ifndef TGDK_IAIBACKEND_HPP
 #define TGDK_IAIBACKEND_HPP
 
 #include <string>
+#include <iostream>
 
+// ====================================================================
+//                       Abstract AI Backend
+// ====================================================================
 class IAIBackend {
 public:
-    // Basic system hooks
     virtual bool Initialize() = 0;
     virtual void OnFrame() = 0;
-
-    // Logging output
     virtual void Log(const std::string& msg) = 0;
     virtual void LogError(const std::string& msg) = 0;
-
-    // Required control queries
     virtual bool IsOliviaActive() const = 0;
     virtual bool ShouldSuppressDraw(float entropy) = 0;
     virtual std::string Identify() const = 0;
     virtual std::string GetStatusString() const = 0;
-
-    // Optional metadata for identification
     virtual std::string GetBackendName() const { return "IAIBackend"; }
+    virtual void OnFrameStart() {}
+    virtual void OnFrameEnd() {}
+    virtual void OnInterceptEvent(const std::string&) {}
+    virtual void Shutdown() {}
+    virtual std::string Query(const std::string& input) {
+        return "[IAIBackend] Default query handler.";
+    }
 
     virtual ~IAIBackend() = default;
 };
 
-// Switch global AI backend (true = OliviaAI, false = fallback like ConsoleAI)
+// ====================================================================
+//                  Global AI Backend Management
+// ====================================================================
+
+// Forward declaration only; implementation is in AI_Backends/Default.hpp
+class DefaultConsoleAI;
+
 void SwitchAIBackend(bool useOlivia);
-
-// Return true if current AI is Olivia
 bool IsOliviaActive();
-
-// Globally exposed backend pointer (owned by internal unique_ptr)
 extern IAIBackend* gAIBackendPtr;
 
 #endif // TGDK_IAIBACKEND_HPP

@@ -12,14 +12,15 @@
 #include "FlatDDSInterceptor.hpp"
 #include "TGDK_IAIBackend.hpp"
 #include "AIRegistry.hpp"
-#include "OliviaAI.hpp"
-#include "MaraAI.hpp"
-#include "ShodanAI.hpp"
-#include "ConsoleAI.hpp"
+#include "AI_Backends\OliviaAI.hpp"
+#include "AI_Backends\MaraAI.hpp"
+#include "AI_Backends\ShodanAI.hpp"
 #include <iostream>
+#include <windows.h>
+#include <d3d11.h>
+#include <chrono>
 #include <string>
 #include <sstream>
-inline "AI_Backends/MyCustomAI.hpp"
 #include <memory>
 #include <vector>
 #include <unordered_map>
@@ -41,9 +42,9 @@ namespace QUADRAQ {
 
 
     static void RegisterBackends() {
-        AIRegistry::Register("olivia", std::make_unique<OliviaBackend>());
-        AIRegistry::Register("mara", std::make_unique<MaraBackend>());
-        AIRegistry::Register("shodan", std::make_unique<ShodanBackend>());
+        AIRegistry::Register("olivia", std::make_unique<OliviaAI>());
+        AIRegistry::Register("mara", std::make_unique<MaraAI>());
+        AIRegistry::Register("shodan", std::make_unique<ShodanAI>());
     }
 
     static bool LoadAIBackendDLL(const std::string& dllName) {
