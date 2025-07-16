@@ -11,12 +11,15 @@
 #include "FlatDDSInterceptor.hpp"
 #include "TGDK_IAIBackend.hpp"
 #include "AIRegistry.hpp"
+#include "KerflumpInterceptor.hpp"
 
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <thread>
 #include <memory>
+#include <d3d11.h>
+
 
 // ==== BACKEND DECLARATIONS ==== //
 #ifdef TGDK_USE_OLIVIA
@@ -35,7 +38,6 @@
 #include "StubAI.hpp"
 #endif
 
-IAIBackend* gAIBackendPtr = nullptr;
 
 std::unique_ptr<IAIBackend> TryInstantiateBackend() {
 #ifdef TGDK_USE_OLIVIA
@@ -88,6 +90,8 @@ std::unique_ptr<IAIBackend> TryInstantiateBackend() {
 
 // ==== CLI LOGIC ==== //
 namespace QUADRAQ {
+    ID3D11Device* g_device = nullptr;
+
 
     void QUADRAQ_CLI_AISwitchLoop();
 
@@ -217,24 +221,32 @@ namespace QUADRAQ {
 
 // ==== MAIN ENTRY POINT ==== //
 int main() {
-    auto ai = TryInstantiateBackend();
+    std::cout << "\n==== QUADRAQ INIT PHASE ====\n";
 
+    auto ai = TryInstantiateBackend();
     if (!ai) {
-        std::cerr << "Fatal: Could not initialize any backend.\n";
+        std::cerr << "Fatal: No usable AI backend. Aborting.\n";
         return 1;
     }
 
     gAIBackendPtr = ai.get();
 
+    // Optional: Initialize Kerflump Interceptor
+    KerflumpInterceptor::Initialize(nullptr, nullptr);  // Replace with actual D3D device/context if needed
+
+    std::cout << "\n[QUADRAQ] Running Warmup Cycle...\n";
+
     for (int i = 0; i < 5; ++i) {
+        KerflumpInterceptor::PreFrameFold();
         gAIBackendPtr->OnFrameStart();
         gAIBackendPtr->OnFrame();
         gAIBackendPtr->OnFrameEnd();
+        KerflumpInterceptor::PostFrameJumpFlush();
     }
 
     gAIBackendPtr->Shutdown();
 
-    // Launch CLI after init loop
+    std::cout << "\n==== QUADRAQ CLI ====\n";
     QUADRAQ::QUADRAQ_CLI_Main();
 
     return 0;

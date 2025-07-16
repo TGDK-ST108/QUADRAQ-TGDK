@@ -52,6 +52,47 @@ add_subdirectory(external/DirectXTK)
 # === Build QUADRAQ Shared Library ===
 add_library(QUADRAQ SHARED ${SOURCES} ${HEADERS} "AI_Backends/KerfumplInterceptor.cpp")
 target_link_libraries(QUADRAQ PRIVATE DirectXTK d3d11)
+set_target_properties(QUADRAQ PROPERTIES PREFIX "" SUFFIX ".dll")
+# === Install QUADRAQ Library ===
+target_sources(QUADRAQ PRIVATE
+    engine/TGDK_IAIBackend.cpp
+    AI_Backends/OliviaAI.cpp
+    AI_Backends/ShodanAI.cpp
+)
+# Install the QUADRAQ library
+install(TARGETS QUADRAQ
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)
+# Install the header files
+install(DIRECTORY include/
+    DESTINATION include/QUADRAQ
+    FILES_MATCHING PATTERN "*.hpp"
+)
+# Install the AI backend headers
+install(DIRECTORY AI_Backends/
+    DESTINATION include/QUADRAQ/AI_Backends
+    FILES_MATCHING PATTERN "*.hpp"
+)
+# Install the KerfumplInterceptor header
+install(FILES AI_Backends/KerfumplInterceptor.hpp
+    DESTINATION include/QUADRAQ/AI_Backends
+)
+# Install the DirectXTK headers
+install(DIRECTORY external/DirectXTK/Inc/
+    DESTINATION include/QUADRAQ/DirectXTK
+    FILES_MATCHING PATTERN "*.h"
+)
+# Install the DirectXTK source files
+install(DIRECTORY external/DirectXTK/Source/
+    DESTINATION include/QUADRAQ/DirectXTK
+    FILES_MATCHING PATTERN "*.cpp"
+)
+# Install the KerfumplInterceptor source file
+install(FILES AI_Backends/KerfumplInterceptor.cpp
+    DESTINATION include/QUADRAQ/AI_Backends
+)
 
 # === Build CLI Executable ===
 add_executable(quadraq_cli engine/QUADRAQ_CLI.cpp "AI_Backends/KerfumplInterceptor.cpp")

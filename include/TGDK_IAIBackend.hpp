@@ -1,12 +1,8 @@
-/* ====================================================================
-//                    TGDK_IAIBackend.hpp
-//    Interface for AI Logging / Control (OliviaAI-Compatible)
-// ==================================================================== */
-
 #ifndef TGDK_IAIBACKEND_HPP
 #define TGDK_IAIBACKEND_HPP
 
 #include <string>
+#include <memory>
 #include <iostream>
 
 // ====================================================================
@@ -14,6 +10,7 @@
 // ====================================================================
 class IAIBackend {
 public:
+    std::unique_ptr<IAIBackend> CreateOliviaBridgeIfEnabled();
     virtual bool Initialize() = 0;
     virtual void OnFrame() = 0;
     virtual void Log(const std::string& msg) = 0;
@@ -35,14 +32,15 @@ public:
 };
 
 // ====================================================================
-//                  Global AI Backend Management
+//                       Global Backend Access
 // ====================================================================
 
-// Forward declaration only; implementation is in AI_Backends/Default.hpp
-class DefaultConsoleAI;
+// Owned backend instance
+IAIBackend* GetAIBackend();
+void SetAIBackend(std::unique_ptr<IAIBackend> backend);
+void ClearAIBackend();
 
-void SwitchAIBackend(bool useOlivia);
-bool IsOliviaActive();
+// Raw pointer compatibility (for legacy modules)
 extern IAIBackend* gAIBackendPtr;
 
 #endif // TGDK_IAIBACKEND_HPP

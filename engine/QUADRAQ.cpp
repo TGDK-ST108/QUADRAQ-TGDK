@@ -33,7 +33,6 @@
 namespace QUADRAQ {
 
     // === Global State ===
-    static IAIBackend* gAIBackend = nullptr;
     static ID3D11Device* g_device = nullptr;
     static ID3D11DeviceContext* g_context = nullptr;
     static std::mutex quadraq_mutex;
@@ -58,8 +57,8 @@ namespace QUADRAQ {
             return false;
         }
 
-        gAIBackend = createFunc();
-        return gAIBackend != nullptr;
+        gAIBackendPtr = createFunc();
+        return gAIBackendPtr != nullptr;
     }
 
     static bool LoadCustomAI() {
@@ -79,18 +78,18 @@ namespace QUADRAQ {
         if (auto* ai = AIRegistry::Get("shodan")) ai->Log("Shodan AI active.");
         if (auto* ai = AIRegistry::Get("olivia")) ai->Log("Olivia AI active.");
 
-        if (gAIBackend) {
-            gAIBackend->Log("QUADRAQ :: AI Backend initialized with DLL: " + aiDll);
-            if (!gAIBackend->Initialize()) {
+        if (gAIBackendPtr) {
+            gAIBackendPtr->Log("QUADRAQ :: AI Backend initialized with DLL: " + aiDll);
+            if (!gAIBackendPtr->Initialize()) {
                 MessageBoxA(nullptr, "AI backend initialization failed", "QUADRAQ", MB_ICONERROR);
                 return false;
             }
 
-            if (gAIBackend->IsOliviaActive()) {
-                gAIBackend->Log("QUADRAQ :: Using OliviaAI backend.");
+            if (gAIBackendPtr->IsOliviaActive()) {
+                gAIBackendPtr->Log("QUADRAQ :: Using OliviaAI backend.");
             }
             else {
-                gAIBackend->Log("QUADRAQ :: Using default AI backend.");
+                gAIBackendPtr->Log("QUADRAQ :: Using default AI backend.");
             }
 
             return true;
@@ -115,29 +114,29 @@ namespace QUADRAQ {
         FlatDDSInterceptor::RegisterOverride("volumetric_godrays.dds");
         FlatDDSInterceptor::RegisterOverride("low_quality_cloudlayer.dds");
 
-        if (gAIBackend)
-            gAIBackend->Log("QUADRAQ :: FlatDDS overrides initialized.");
+        if (gAIBackendPtr)
+            gAIBackendPtr->Log("QUADRAQ :: FlatDDS overrides initialized.");
     }
 
     static DWORD WINAPI MainThreadProc(LPVOID) {
         if (!LoadCustomAI()) return 1;
 
-        if (gAIBackend) gAIBackend->Log("QUADRAQ :: Initializing Quantum GPU Accelerator...");
+        if (gAIBackendPtr) gAIBackendPtr->Log("QUADRAQ :: Initializing Quantum GPU Accelerator...");
 
         if (!EntropyPredictor::Initialize()) {
-            if (gAIBackend) gAIBackend->LogError("QUADRAQ :: EntropyPredictor failed to init");
+            if (gAIBackendPtr) gAIBackendPtr->LogError("QUADRAQ :: EntropyPredictor failed to init");
             return 1;
         }
 
         if (!ShaderOverrideUnit::HookPipeline(g_device, g_context)) {
-            if (gAIBackend) gAIBackend->LogError("QUADRAQ :: Failed to hook GPU pipeline");
+            if (gAIBackendPtr) gAIBackendPtr->LogError("QUADRAQ :: Failed to hook GPU pipeline");
             return 2;
         }
 
         InitFlatTextureIntercepts();
         QuantumDrawRouter::EnableRouting(true);
 
-        if (gAIBackend) gAIBackend->Log("QUADRAQ :: Acceleration Layer Ready");
+        if (gAIBackendPtr) gAIBackendPtr->Log("QUADRAQ :: Acceleration Layer Ready");
         initialized = true;
 
         StartCLIRuntime();
@@ -150,7 +149,7 @@ namespace QUADRAQ {
             std::this_thread::sleep_for(std::chrono::milliseconds(4));
         }
 
-        if (gAIBackend) gAIBackend->Log("QUADRAQ :: Shutting down...");
+        if (gAIBackendPtr) gAIBackendPtr->Log("QUADRAQ :: Shutting down...");
         return 0;
     }
 

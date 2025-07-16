@@ -19,7 +19,6 @@ namespace ShaderOverrideUnit {
     static bool overrideEnabled = false;
     static std::vector<ID3D11PixelShader*> overriddenShaders;
 
-    extern IAIBackend* gAIBackendPtr;
 
     bool HookPipeline(ID3D11Device* device, ID3D11DeviceContext* context) {
         std::lock_guard<std::mutex> lock(shader_mutex);

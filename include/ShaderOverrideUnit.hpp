@@ -19,6 +19,8 @@ namespace ShaderOverrideUnit {
     // Enables/disables the override system
     void SetEnabled(bool enable);
 
+    void ForceMinimal(bool state);
+
     // Returns whether override system is currently active
     bool IsEnabled();
 }

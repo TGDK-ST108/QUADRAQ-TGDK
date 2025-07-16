@@ -13,14 +13,15 @@
 #include "OliviaAI.hpp"
 #endif
 
-// === Internal flag ===
+// === Global Backend Pointers ===
+static std::unique_ptr<IAIBackend> g_ownedBackend = nullptr;
+IAIBackend* gAIBackendPtr = nullptr;
 static bool usingOlivia = false;
 
-// === Global pointer instance ===
-std::unique_ptr<IAIBackend> gAIBackend;
-IAIBackend* gAIBackendPtr = nullptr;
+// === DLL Loader State ===
+static HMODULE g_aiDllHandle = nullptr;
 
-// === Olivia Adapter (if enabled) ===
+// === Olivia Adapter Implementation ===
 #ifdef TGDK_USE_OLIVIA
 class OliviaBridgeAI : public IAIBackend {
 public:
@@ -52,36 +53,14 @@ public:
     std::string GetBackendName() const override {
         return "OliviaAI";
     }
+
+    std::string Identify() const override { return "OliviaAI"; }
+    std::string GetStatusString() const override { return "Live"; }
 };
 #endif
 
-/*// === Factory Function ===
-std::unique_ptr<IAIBackend> CreateAIBackend(bool useOlivia) {
-#ifdef TGDK_USE_OLIVIA
-    if (useOlivia) {
-        usingOlivia = true;
-        return std::make_unique<OliviaBridgeAI>();
-    }
-#endif
-    usingOlivia = false;
-    return std::make_unique<DefaultConsoleAI>();
-}*/
-
-// === Public Control Functions ===
-/*    gAIBackend = CreateAIBackend(useOliviaFlag);
-    gAIBackendPtr = gAIBackend.get();
-    gAIBackend->Log(useOliviaFlag ? "Switched to OliviaAI." : "Switched to DefaultConsoleAI.");
-}*/
-
-bool IsOliviaActive() {
-    return usingOlivia;
-}
-
-// === DLL Backend Loader ===
+// === DLL Load Entry Point ===
 typedef IAIBackend* (*CreateAIBackendFunc)();
-
-static HMODULE g_aiDllHandle = nullptr;
-static IAIBackend* g_loadedAI = nullptr;
 
 bool LoadAIBackendDLL(const std::string& dllPath) {
     g_aiDllHandle = LoadLibraryA(dllPath.c_str());
@@ -93,13 +72,45 @@ bool LoadAIBackendDLL(const std::string& dllPath) {
     auto createFunc = (CreateAIBackendFunc)GetProcAddress(g_aiDllHandle, "CreateAIBackend");
     if (!createFunc) {
         std::cerr << "[TGDK] Missing symbol: CreateAIBackend in " << dllPath << std::endl;
+        FreeLibrary(g_aiDllHandle);
+        g_aiDllHandle = nullptr;
         return false;
     }
 
-    g_loadedAI = createFunc();
-    return g_loadedAI != nullptr;
+    SetAIBackend(std::unique_ptr<IAIBackend>(createFunc()));
+    return gAIBackendPtr != nullptr;
 }
 
+// === Core Access ===
 IAIBackend* GetAIBackend() {
-    return g_loadedAI ? g_loadedAI : gAIBackendPtr;
+    return gAIBackendPtr;
+}
+
+void SetAIBackend(std::unique_ptr<IAIBackend> backend) {
+    g_ownedBackend = std::move(backend);
+    gAIBackendPtr = g_ownedBackend.get();
+}
+
+void ClearAIBackend() {
+    g_ownedBackend.reset();
+    gAIBackendPtr = nullptr;
+
+    if (g_aiDllHandle) {
+        FreeLibrary(g_aiDllHandle);
+        g_aiDllHandle = nullptr;
+    }
+}
+
+bool IsOliviaActive() {
+    return usingOlivia;
+}
+
+// === Optional Factory Call ===
+std::unique_ptr<IAIBackend> CreateOliviaBridgeIfEnabled() {
+#ifdef TGDK_USE_OLIVIA
+    usingOlivia = true;
+    return std::make_unique<OliviaBridgeAI>();
+#else
+    return nullptr;
+#endif
 }

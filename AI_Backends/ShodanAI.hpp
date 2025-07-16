@@ -1,27 +1,25 @@
-#ifndef TGDK_SHODAN_AI_HPP
-#define TGDK_SHODAN_AI_HPP
+// ShodanAI.hpp
+#pragma once
 
-#include "TGDK_IAIBackend.hpp"
 #include <string>
+#include "IAIBackend.hpp"  // or the correct path if it's different
 
 class ShodanAI : public IAIBackend {
 public:
-    std::string Query(const std::string& input) override;
-    void OnFrameStart() override;
-    void OnFrameEnd() override;
-    void OnInterceptEvent(const std::string& event) override;
-    void Shutdown() override;
-    virtual bool Initialize() = 0;
-    virtual void OnFrame() = 0;
-    virtual void Log(const std::string& msg) = 0;
-    virtual void LogError(const std::string& msg) = 0;
-    virtual bool IsOliviaActive() const = 0;
-    virtual bool ShouldSuppressDraw(float entropy) = 0;
-    virtual std::string Identify() const = 0;
-    virtual std::string GetStatusString() const = 0;
-
+    virtual ~ShodanAI();  // ? THIS is required
+    virtual bool Initialize();
+    virtual void Shutdown();
+    virtual void OnFrameStart();
+    virtual void OnFrameEnd();
+    virtual void OnInterceptEvent(const std::string& event);
+    virtual void OnFrame();
+    virtual void Log(const std::string& msg);
+    virtual void LogError(const std::string& msg);
+    virtual bool IsOliviaActive() const;
+    virtual bool ShouldSuppressDraw(float entropy);
+    virtual std::string Identify() const;
+    virtual std::string GetStatusString() const;
+    virtual std::string Query(const std::string& input); // Declaration only
 };
 
-extern "C" __declspec(dllexport) IAIBackend* CreateAIBackend();
-
-#endif // TGDK_SHODAN_AI_HPP
+// Provide the default implementation in the .cpp file, not inline in the class

@@ -3,25 +3,29 @@
 
 #include "TGDK_IAIBackend.hpp"
 #include <string>
+#include <iostream>
 
 class MaraAI : public IAIBackend {
 public:
+    // === Core IAIBackend Interface ===
     std::string Query(const std::string& input) override;
     void OnFrameStart() override;
     void OnFrameEnd() override;
     void OnInterceptEvent(const std::string& event) override;
     void Shutdown() override;
-    virtual bool Initialize() = 0;
-    virtual void OnFrame() = 0;
-    virtual void Log(const std::string& msg) = 0;
-    virtual void LogError(const std::string& msg) = 0;
-    virtual bool IsOliviaActive() const = 0;
-    virtual bool ShouldSuppressDraw(float entropy) = 0;
-    virtual std::string Identify() const = 0;
-    virtual std::string GetStatusString() const = 0;
 
+    // === QUADRAQ Extended Interface ===
+    bool Initialize() override;
+    void OnFrame() override;
+    void Log(const std::string& msg) override;
+    void LogError(const std::string& msg) override;
+    bool IsOliviaActive() const override;
+    bool ShouldSuppressDraw(float entropy) override;
+    std::string Identify() const override;
+    std::string GetStatusString() const override;
 };
 
+// Exported creator for dynamic linkage
 extern "C" __declspec(dllexport) IAIBackend* CreateAIBackend();
 
-#endif
+#endif // TGDK_MARA_AI_HPP

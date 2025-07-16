@@ -12,8 +12,6 @@
 #include <d3d11.h>
 #include <mutex>
 
-extern IAIBackend* gAIBackend;
-
 namespace QuantumDrawRouter {
 
     static bool routingEnabled = true;
@@ -24,18 +22,20 @@ namespace QuantumDrawRouter {
         std::lock_guard<std::mutex> lock(routerMutex);
         routingEnabled = enable;
 
-        if (gAIBackend) {
-            gAIBackend->Log(std::string("QuantumDrawRouter :: Routing ") +
-                            (enable ? "ENABLED" : "DISABLED"));
+        IAIBackend* backend = GetAIBackend();
+        if (backend) {
+            backend->Log(std::string("QuantumDrawRouter :: Routing ") +
+                (enable ? "ENABLED" : "DISABLED"));
         }
     }
+
 
     void SetEntropyThreshold(float threshold) {
         std::lock_guard<std::mutex> lock(routerMutex);
         entropyThreshold = threshold;
 
-        if (gAIBackend) {
-            gAIBackend->Log("QuantumDrawRouter :: Set entropy threshold to " + std::to_string(threshold));
+        if (gAIBackendPtr) {
+            gAIBackendPtr->Log("QuantumDrawRouter :: Set entropy threshold to " + std::to_string(threshold));
         }
     }
 
@@ -48,7 +48,7 @@ namespace QuantumDrawRouter {
         float entropy = EntropyPredictor::GetCurrentEntropyRate();
 
         // Let AI override suppression decision
-        if (gAIBackend && gAIBackend->ShouldSuppressDraw(entropy)) {
+        if (gAIBackendPtr && gAIBackendPtr->ShouldSuppressDraw(entropy)) {
             return true;
         }
 
@@ -57,8 +57,8 @@ namespace QuantumDrawRouter {
 
     void AttemptDraw(ID3D11DeviceContext* context, ID3D11Buffer* vertexBuffer, UINT stride, UINT offset) {
         if (ShouldSuppressDraw()) {
-            if (gAIBackend)
-                gAIBackend->LogError("QuantumDrawRouter :: Suppressed draw call due to high entropy.");
+            if (gAIBackendPtr)
+                gAIBackendPtr->LogError("QuantumDrawRouter :: Suppressed draw call due to high entropy.");
             return; // Skip rendering
         }
 

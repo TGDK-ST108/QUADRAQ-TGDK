@@ -1,59 +1,107 @@
-
-// ====================================================================
-//                        OliviaAI.cpp
-//     TGDK Closed Bridge AI Interface for QUADRAQ + TGDK Systems
-//     License: TGDK BFE-TGDK-022ST • Sean Tichenor • All Rights Reserved
-// ====================================================================
+// OliviaAI.cpp
+// ==========================================
+// OliviaAI Quantum Circumferentialized Core
+// Duosnell Quantum Particlization Applied
+// License: TGDK BFE-TGDK-022ST · OliviaAI-TGDK
+// ==========================================
 
 #include "OliviaAI.hpp"
 #include <iostream>
-#include <mutex>
-#include <fstream>
-#include <ctime>
+#include <chrono>
+#include <thread>
+#include <cmath>
+#include <random>
 
-static std::mutex olivia_mutex;
+// === Internal Quantum State ===
+static float entropicFlux = 0.0f;
 static bool initialized = false;
+static std::string lastIntercept = "";
+static std::string oliviaId = "OliviaAI::CircumQuantum-1";
+static std::chrono::steady_clock::time_point startTime;
 
-namespace OliviaAI {
-
-    void Initialize() {
-        std::lock_guard<std::mutex> lock(olivia_mutex);
-        if (initialized) return;
-
-        Log("OliviaAI :: Initializing AI Context...");
-        // Placeholder for real AI backend init logic
-        initialized = true;
+// === Duosnell Quantum Utilities ===
+namespace {
+    float GenerateEntropy() {
+        static std::mt19937 rng(std::random_device{}());
+        static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+        return dist(rng);
     }
 
-    void Pulse() {
-        std::lock_guard<std::mutex> lock(olivia_mutex);
-        if (!initialized) return;
-
-        // This could connect to Olivia's logic cycle
-        Log("OliviaAI :: Pulse()");
+    std::string TimeSinceInit() {
+        auto now = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(now - startTime).count();
+        return std::to_string(duration) + "s since activation";
     }
+}
 
-    void Log(const std::string& msg) {
-        std::lock_guard<std::mutex> lock(olivia_mutex);
-        std::cout << "[OliviaAI] " << msg << std::endl;
-        AppendToLogFile("[INFO] " + msg);
-    }
+    OliviaAI::~OliviaAI() = default;
 
-    void LogError(const std::string& msg) {
-        std::lock_guard<std::mutex> lock(olivia_mutex);
-        std::cerr << "[OliviaAI:ERROR] " << msg << std::endl;
-        AppendToLogFile("[ERROR] " + msg);
-    }
+bool OliviaAI::Initialize() {
+    std::cout << "[OliviaAI] Initializing Duosnell Quantum Bridge...\n";
+    startTime = std::chrono::steady_clock::now();
+    initialized = true;
+    entropicFlux = GenerateEntropy();
+    std::cout << "[OliviaAI] Initialization complete.\n";
+    return true;
+}
 
-    void AppendToLogFile(const std::string& msg) {
-        std::ofstream logFile("OliviaAI.log", std::ios::app);
-        if (!logFile.is_open()) return;
+void OliviaAI::Shutdown() {
+    std::cout << "[OliviaAI] Shutting down. Final flux: " << entropicFlux << "\n";
+    initialized = false;
+}
 
-        std::time_t now = std::time(nullptr);
-        char* dt = std::ctime(&now);
-        if (dt) dt[strlen(dt) - 1] = '\0'; // remove newline
+void OliviaAI::OnFrameStart() {
+    entropicFlux = GenerateEntropy();
+    std::cout << "[OliviaAI] Frame Start. Entropic Flux: " << entropicFlux << "\n";
+}
 
-        logFile << "[" << dt << "] " << msg << "\n";
-    }
+void OliviaAI::OnFrameEnd() {
+    std::cout << "[OliviaAI] Frame End. System Stable.\n";
+}
 
+void OliviaAI::OnInterceptEvent(const std::string& event) {
+    lastIntercept = event;
+    std::cout << "[OliviaAI] Intercepted Event: " << event << "\n";
+}
+
+void OliviaAI::OnFrame() {
+    if (!initialized) return;
+    entropicFlux = std::fmod(entropicFlux + 0.0137f, 1.0f);
+    std::cout << "[OliviaAI] Pulse :: Entropic Flux Updated :: " << entropicFlux << "\n";
+}
+
+void OliviaAI::Log(const std::string& msg) {
+    std::cout << "[OliviaAI][Log] " << msg << "\n";
+}
+
+void OliviaAI::LogError(const std::string& msg) {
+    std::cerr << "[OliviaAI][ERROR] " << msg << "\n";
+}
+
+bool OliviaAI::IsOliviaActive() const {
+    return initialized;
+}
+
+bool OliviaAI::ShouldSuppressDraw(float entropy) {
+    bool suppress = entropy + entropicFlux > 1.25f;
+    std::cout << "[OliviaAI] Draw Suppression Check :: Input=" << entropy << " Flux=" << entropicFlux
+        << " => " << (suppress ? "SUPPRESS" : "ALLOW") << "\n";
+    return suppress;
+}
+
+std::string OliviaAI::Query(const std::string& input) {
+    std::string response = "[OliviaAI::Quantum Response] Received: " + input +
+        " | Time: " + TimeSinceInit() +
+        " | Flux: " + std::to_string(entropicFlux);
+    std::cout << response << "\n";
+    return response;
+}
+
+std::string OliviaAI::Identify() const {
+    return oliviaId;
+}
+
+std::string OliviaAI::GetStatusString() const {
+    return "[OliviaAI] Status: Active | Flux: " + std::to_string(entropicFlux) +
+        " | Last Event: " + (lastIntercept.empty() ? "None" : lastIntercept);
 }

@@ -16,8 +16,6 @@
 
 using namespace Microsoft::WRL;
 
-extern IAIBackend* gAIBackendPtr;
-
 namespace {
     struct Vertex {
         float position[3];
@@ -32,6 +30,7 @@ namespace ShaderOverrideUnit {
     static std::vector<ID3D11PixelShader*> overriddenShaders;
     static bool hookInitialized = false;
     static bool overrideEnabled = false;
+    static bool minimalMode = false;
     static std::mutex stateMutex;
 
     bool HookPipeline(ID3D11Device* device, ID3D11DeviceContext* context) {
@@ -80,6 +79,10 @@ namespace ShaderOverrideUnit {
     bool IsEnabled() {
         std::lock_guard<std::mutex> lock(stateMutex);
         return overrideEnabled;
+    }
+
+    void ShaderOverrideUnit::ForceMinimal(bool state) {
+        minimalMode = state;
     }
 
     void OverridePixelShader(ID3D11PixelShader* newShader) {

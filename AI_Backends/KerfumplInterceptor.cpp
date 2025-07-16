@@ -17,7 +17,7 @@ void KerflumpInterceptor::Initialize(ID3D11Device* device, ID3D11DeviceContext* 
 void KerflumpInterceptor::PreFrameFold() {
     if (EntropyPredictor::IsOverloaded()) {
         std::cout << "[Kerflump] Entropy spike detected. Initiating frame fold.\n";
-        ShaderOverrideUnit::ForceMinimal();
+        ShaderOverrideUnit::ForceMinimal(true);
     }
 }
 

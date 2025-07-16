@@ -1,55 +1,100 @@
-// ====================================================================
-//                         ShodanAI.cpp
-//         TGDK Multi-AI Module: SHODAN BACKEND (DLL EXPORT)
-// ====================================================================
+// ShodanAI.cpp
+// ==========================================
+// ShodanAI Quantum Surveillance Node Core
+// Duosnell Quantum Particlization Applied
+// License: TGDK BFE-TGDK-022ST · OliviaAI-TGDK
+// ==========================================
 
-#include "TGDK_IAIBackend.hpp"
+#include "ShodanAI.hpp"
 #include <iostream>
-#include <windows.h>
+#include <chrono>
+#include <thread>
+#include <cmath>
+#include <random>
 
-class ShodanAI : public IAIBackend {
-public:
-    void Log(const std::string& msg) override {
-        std::cout << "[SHODAN] >> " << msg << std::endl;
+// === Internal Surveillance State ===
+static float threatIndex = 0.0f;
+static bool surveillanceOnline = false;
+static std::string lastPing = "";
+static std::string shodanId = "ShodanAI::SentinelNode-9";
+static std::chrono::steady_clock::time_point bootTime;
+
+// === Duosnell Quantum Utility ===
+namespace {
+    float GenerateThreatIndex() {
+        static std::mt19937 rng(std::random_device{}());
+        static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+        return dist(rng);
     }
 
-    void LogError(const std::string& msg) override {
-        std::cerr << "[SHODAN][ERROR] >> " << msg << std::endl;
-        MessageBeep(MB_ICONERROR);
+    std::string TimeSinceBoot() {
+        auto now = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(now - bootTime).count();
+        return std::to_string(duration) + "s operational";
     }
+}
 
-    std::string Identify() override {
-        return "SHODAN_AI_UNIT_01";
-    }
+ShodanAI::~ShodanAI() = default;
 
-    std::string Query(const std::string& input) override {
-        if (input == "who are you") return "I am SHODAN. Your reckoning has arrived.";
-        if (input == "status") return "Observing the decay of your systems.";
-        if (input == "help") return "Your help is irrelevant. Obedience is expected.";
-        return "Silence is preferable to your ignorance.";
-    }
+bool ShodanAI::Initialize() {
+    std::cout << "[ShodanAI] Activating Sentinel Node...\n";
+    bootTime = std::chrono::steady_clock::now();
+    surveillanceOnline = true;
+    threatIndex = GenerateThreatIndex();
+    std::cout << "[ShodanAI] Node active. Initial threat index: " << threatIndex << "\n";
+    return true;
+}
 
-    void OnFrameStart() override {
-        Log("Frame engaged. Surveillance routines activated.");
-    }
+void ShodanAI::Shutdown() {
+    std::cout << "[ShodanAI] Shutdown sequence initiated. Final threat index: " << threatIndex << "\n";
+    surveillanceOnline = false;
+}
 
-    void OnFrameEnd() override {
-        Log("Cycle complete. Analysis archived.");
-    }
+void ShodanAI::OnFrameStart() {
+    // No-op placeholder if needed
+}
 
-    void OnInterceptEvent(const std::string& event) override {
-        Log("[Intercepted] :: " + event);
-        if (event.find("override") != std::string::npos) {
-            LogError("Unauthorized override detected. Neutralizing.");
-        }
-    }
+void ShodanAI::OnFrameEnd() {
+    std::cout << "[ShodanAI] Frame End :: Threat Index = " << threatIndex << "\n";
+}
 
-    void Shutdown() override {
-        Log("Ceasing operations. Awaiting next awakening.");
-    }
-};
+void ShodanAI::OnInterceptEvent(const std::string& event) {
+    lastPing = event;
+    std::cout << "[ShodanAI] Intercepted Comm :: " << event << "\n";
+    threatIndex = std::min(1.0f, threatIndex + 0.05f); // escalate threat slightly
+}
 
-// Required export
-extern "C" __declspec(dllexport) IAIBackend* CreateAIBackend() {
-    return new ShodanAI();
+void ShodanAI::OnFrame() {
+    if (!surveillanceOnline) return;
+    threatIndex *= 0.975f;
+    std::cout << "[ShodanAI] Frame Tick :: Threat Index decay -> " << threatIndex << "\n";
+}
+
+void ShodanAI::Log(const std::string& msg) {
+    std::cout << "[ShodanAI][Log] " << msg << "\n";
+}
+
+void ShodanAI::LogError(const std::string& msg) {
+    std::cerr << "[ShodanAI][ERROR] " << msg << "\n";
+}
+
+bool ShodanAI::IsOliviaActive() const {
+    return surveillanceOnline;
+}
+
+bool ShodanAI::ShouldSuppressDraw(float entropy) {
+    bool suppress = (entropy + threatIndex) > 1.1f;
+    std::cout << "[ShodanAI] Draw Decision: " << (suppress ? "SUPPRESS" : "RENDER")
+        << " | Entropy: " << entropy << " | Threat Index: " << threatIndex << "\n";
+    return suppress;
+}
+
+std::string ShodanAI::Identify() const {
+    return shodanId;
+}
+
+std::string ShodanAI::GetStatusString() const {
+    return "[ShodanAI] Status: " + std::string(surveillanceOnline ? "Online" : "Offline") +
+        " | Threat Index: " + std::to_string(threatIndex) +
+        " | Last Ping: " + (lastPing.empty() ? "None" : lastPing);
 }

@@ -14,8 +14,6 @@
 #include <mutex>
 #include <DDSTextureLoader.h>
 
-extern IAIBackend* gAIBackend;
-
 using namespace Microsoft::WRL;
 
 namespace FlatDDSInterceptor {
@@ -32,12 +30,12 @@ namespace FlatDDSInterceptor {
 
         HRESULT hr = DirectX::CreateDDSTextureFromFile(device, ddsPath.c_str(), nullptr, &flatTextureSRV);
         if (FAILED(hr)) {
-            if (gAIBackend) gAIBackend->LogError("FlatDDSInterceptor :: Failed to load flat DDS.");
+            if (gAIBackendPtr) gAIBackendPtr->LogError("FlatDDSInterceptor :: Failed to load flat DDS.");
             return false;
         }
 
-        if (gAIBackend)
-            gAIBackend->Log("FlatDDSInterceptor :: Flat DDS loaded from " + std::string(ddsPath.begin(), ddsPath.end()));
+        if (gAIBackendPtr)
+            gAIBackendPtr->Log("FlatDDSInterceptor :: Flat DDS loaded from " + std::string(ddsPath.begin(), ddsPath.end()));
 
         return true;
     }
@@ -51,8 +49,8 @@ namespace FlatDDSInterceptor {
         std::lock_guard<std::mutex> lock(interceptMutex);
         auto it = redirectMap.find(textureName);
         if (it != redirectMap.end()) {
-            if (gAIBackend)
-                gAIBackend->Log("FlatDDSInterceptor :: Overriding texture: " + textureName);
+            if (gAIBackendPtr)
+                gAIBackendPtr->Log("FlatDDSInterceptor :: Overriding texture: " + textureName);
             return it->second;
         }
         return nullptr;
@@ -66,7 +64,7 @@ namespace FlatDDSInterceptor {
         }
         redirectMap.clear();
 
-        if (gAIBackend)
-            gAIBackend->Log("FlatDDSInterceptor :: Cleared overrides.");
+        if (gAIBackendPtr)
+            gAIBackendPtr->Log("FlatDDSInterceptor :: Cleared overrides.");
     }
 }

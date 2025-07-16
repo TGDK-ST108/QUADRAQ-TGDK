@@ -14,7 +14,6 @@
 #include <mutex>
 #include <deque>
 
-extern IAIBackend* gAIBackendPtr;
 
 namespace EntropyPredictor {
 
@@ -26,6 +25,9 @@ namespace EntropyPredictor {
     static float entropyRate = 0.0f;
     static bool initialized = false;
     static bool enabled = false;
+
+    // Add a static variable to track overload state
+    static bool overload = false;
 
     bool Initialize() {
         std::lock_guard<std::mutex> lock(entropyMutex);
@@ -58,6 +60,10 @@ namespace EntropyPredictor {
     bool IsEnabled() {
         std::lock_guard<std::mutex> lock(entropyMutex);
         return enabled;
+    }
+
+    bool EntropyPredictor::IsOverloaded() {
+        return overload;
     }
 
     float GetCurrentEntropyRate() {

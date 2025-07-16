@@ -6,4 +6,5 @@ namespace EntropyPredictor {
     bool IsEnabled();
     float GetCurrentEntropyRate();
     void UpdateCycle();
+    bool IsOverloaded();
 }

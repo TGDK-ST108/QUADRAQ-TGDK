@@ -11,6 +11,27 @@
 
 class MaraAI : public IAIBackend {
 public:
+    bool Initialize() override {
+        Log("MaraAI initialized.");
+        return true;
+    }
+
+    void OnFrame() override {
+        Log("OnFrame called.");
+    }
+
+    bool IsOliviaActive() const override {
+        return false;
+    }
+
+    bool ShouldSuppressDraw(float entropy) override {
+        return entropy > 1.0f;
+    }
+
+    std::string GetStatusString() const override {
+        return "MaraAI status: OK";
+    }
+
     void Log(const std::string& msg) override {
         std::cout << "[MARA] " << GetTimestamp() << " :: " << msg << std::endl;
     }
